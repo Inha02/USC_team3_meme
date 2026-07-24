@@ -38,10 +38,28 @@ describe("표정 분류기", () => {
   it("민감 모드에서는 임계값과 정확히 같아도 조건을 만족한다", () => {
     expect(
       classifyExpression(
-        { browDownLeft: 0.08 },
+        { browDownLeft: 0.01, browInnerDistanceDelta: -0.015 },
         rules
       )
     ).toBe("angry");
+  });
+
+  it("눈썹을 내려도 눈썹 사이가 가까워지지 않으면 화남이 아니다", () => {
+    expect(
+      classifyExpression(
+        { browDownLeft: 0.2, browDownRight: 0.2, browInnerDistanceDelta: 0 },
+        rules
+      )
+    ).toBe("neutral");
+  });
+
+  it("안쪽 눈썹 상승과 입꼬리 내림이 함께 있으면 울상이다", () => {
+    expect(
+      classifyExpression(
+        { browInnerUp: 0.3, mouthFrownRight: 0.1 },
+        rules
+      )
+    ).toBe("sad");
   });
 
   it("반올림 전 0.7 미만인 미소도 민감하게 폭소로 판정한다", () => {

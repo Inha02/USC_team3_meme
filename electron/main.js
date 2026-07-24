@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, screen, session } from "electron";
 import fs from "node:fs/promises";
+import { rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import axios from "axios";
@@ -61,9 +62,9 @@ function createResultWindow() {
 
   resultWindow = new BrowserWindow({
     width: 440,
-    height: 720,
+    height: 660,
     minWidth: 380,
-    minHeight: 620,
+    minHeight: 580,
     show: false,
     title: "facememe 결과",
     backgroundColor: "#17171c",
@@ -127,6 +128,16 @@ app.whenReady().then(async () => {
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
+});
+
+app.on("will-quit", () => {
+  const cacheFile = path.join(app.getPath("userData"), "jjalBotMap.json");
+  try {
+    rmSync(cacheFile, { force: true });
+    console.log(`[jalBot] 앱 종료 시 검색 캐시를 삭제했습니다: ${cacheFile}`);
+  } catch (error) {
+    console.warn("[jalBot] 종료 시 검색 캐시 삭제 실패:", error.message);
+  }
 });
 
 ipcMain.handle("meme:create", async (_event, payload) => {
@@ -195,7 +206,10 @@ ipcMain.on("expression:log", (_event, payload) => {
     "browDownLeft",
     "browDownRight",
     "mouthFrownLeft",
-    "browInnerUp"
+    "mouthFrownRight",
+    "browInnerUp",
+    "browInnerDistance",
+    "browInnerDistanceDelta"
   ];
   const safeScores = Object.fromEntries(
     relevantShapes.map((name) => [

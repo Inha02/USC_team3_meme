@@ -6,11 +6,11 @@ const API_URL = "https://api.jjalbot.com";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const CATEGORIES = ["surprised", "laughing", "angry", "sad", "neutral"];
 const searchKeywords = {
-  surprised: ["놀란", "당황", "충격", "대박"],
-  laughing: ["웃긴", "폭소", "신나는", "웃는"],
-  angry: ["화난", "분노", "빡침", "정색"],
-  sad: ["슬픈", "우는", "눈물", "현타"],
-  neutral: ["무표정", "멍", "어이없음", "덤덤"]
+  surprised: ["엥", "?????", "개놀람"],
+  laughing: ["ㅋㅋ", "웃김", "웃참", "폭소", "신나는"],
+  angry: ["에바", "개화나네", "화나", "화난", "분노", "빡침", "정색"],
+  sad: ["ㅜㅜ", "ㅠㅠ", "슬픔", "흑흑", "서러움", "슬픈", "우는", "눈물", "현타", "슬퍼" ],
+  neutral: ["어쩔", "어쩌라고", "무표정", "멍", "어이없음", "덤덤"]
 };
 
 let templatePools = null;

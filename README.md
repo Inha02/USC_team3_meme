@@ -45,6 +45,10 @@ npm run dev
 
 `src/hooks/useFaceLandmarker.js`가 숨긴 `<video>`에서 프레임을 읽고 `runningMode: "VIDEO"`, `outputFaceBlendshapes: true`로 FaceLandmarker를 실행합니다.
 
+얼굴이 처음 감지된 약 45프레임 동안 랜드마크 `107/336`의 눈썹 안쪽 거리와
+`33/263`의 눈 너비를 이용해 사용자 기준 거리를 보정합니다. 이후 정규화된
+`browInnerDistanceDelta`를 화남·울상 구분에 함께 사용합니다.
+
 ```bash
 npm run prepare:assets
 npm run dev
@@ -78,8 +82,9 @@ npm test
 `GET https://api.jjalbot.com/jjals`를 호출합니다. `nsfw=false`를 고정하고
 GIF, `videoUrl`이 있는 움직이는 짤, 비디오와 유효하지 않은 이미지 URL을
 제거하고 JPEG·PNG·정적 WebP만 남긴 뒤, 중복 제거 및 조회수 정렬을
-수행합니다. 표정별 후보는 `jjalBotMap.json`으로 24시간 캐시되며 캡처와
-다시 생성 때 라운드로빈으로 순환합니다.
+수행합니다. 실행 중에는 표정별 후보를 `jjalBotMap.json`으로 캐시하며 캡처와
+다시 생성 때 라운드로빈으로 순환합니다. 앱이 완전히 종료되면 검색 캐시는
+자동 삭제되어 다음 실행 때 새로 검색합니다.
 
 선택한 jalBot 정적 이미지는 가공하거나 캡션을 추가하지 않고 원본 URL을
 그대로 미리보기에 사용합니다. jalBot 검색 API에는 별도의 API 키가 필요하지 않습니다.

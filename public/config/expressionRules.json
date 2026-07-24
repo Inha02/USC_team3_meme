@@ -6,11 +6,11 @@
       "priority": 1,
       "category": "surprised",
       "label": "놀람",
-      "minMatches": 2,
+      "minMatches": 1,
       "conditions": [
         { "shape": "eyeWideLeft", "operator": ">=", "threshold": 0.01 },
         { "shape": "eyeWideRight", "operator": ">=", "threshold": 0.01 },
-        { "shape": "jawOpen", "operator": ">=", "threshold": 0.3 }
+        { "shape": "jawOpen", "operator": ">=", "threshold": 0.1 }
       ]
     },
     {
@@ -30,20 +30,42 @@
       "priority": 3,
       "category": "angry",
       "label": "화남",
-      "minMatches": 1,
-      "conditions": [
-        { "shape": "browDownLeft", "operator": ">=", "threshold": 0.08 },
-        { "shape": "browDownRight", "operator": ">=", "threshold": 0.08 }
+      "conditionGroups": [
+        {
+          "minMatches": 1,
+          "conditions": [
+            { "shape": "browDownLeft", "operator": ">=", "threshold": 0.01 },
+            { "shape": "browDownRight", "operator": ">=", "threshold": 0.01 },
+            { "shape": "browInnerUp", "operator": ">=", "threshold": 0.2 }
+          ]
+        },
+        {
+          "minMatches": 1,
+          "conditions": [
+            { "shape": "browInnerDistanceDelta", "operator": "<=", "threshold": 0.01 }
+          ]
+        }
       ]
     },
     {
       "priority": 4,
       "category": "sad",
       "label": "울상/현타",
-      "minMatches": 1,
-      "conditions": [
-        { "shape": "mouthFrownLeft", "operator": ">=", "threshold": 0.06 },
-        { "shape": "browInnerUp", "operator": ">=", "threshold": 0.18 }
+      "conditionGroups": [
+        {
+          "minMatches": 1,
+          "conditions": [
+            { "shape": "browInnerUp", "operator": ">=", "threshold": 0.18 }
+          ]
+        },
+        {
+          "minMatches": 1,
+          "conditions": [
+            { "shape": "mouthFrownLeft", "operator": ">=", "threshold": 0.06 },
+            { "shape": "mouthFrownRight", "operator": ">=", "threshold": 0.06 },
+            { "shape": "browInnerDistanceDelta", "operator": ">=", "threshold": 0.01 }
+          ]
+        }
       ]
     }
   ],

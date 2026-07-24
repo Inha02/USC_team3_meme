@@ -46,6 +46,8 @@ function matchesCondition(score, condition) {
   const value = score[condition.shape] || 0;
   if (condition.operator === ">") return value > condition.threshold;
   if (condition.operator === ">=") return value >= condition.threshold;
+  if (condition.operator === "<") return value < condition.threshold;
+  if (condition.operator === "<=") return value <= condition.threshold;
   return false;
 }
 
@@ -56,23 +58,40 @@ export function classifyExpression(snapshot, config) {
 export function explainExpression(snapshot, config) {
   const sortedRules = [...config.rules].sort((a, b) => a.priority - b.priority);
   const evaluations = sortedRules.map((rule) => {
-    const matchedConditions = rule.conditions.filter((condition) =>
+    const conditions = rule.conditions || [];
+    const matchedConditions = conditions.filter((condition) =>
       matchesCondition(snapshot, condition)
     );
-    const failedConditions = rule.conditions.filter(
+    const failedConditions = conditions.filter(
       (condition) => !matchesCondition(snapshot, condition)
     );
+    const groupEvaluations = (rule.conditionGroups || []).map((group) => {
+      const matched = group.conditions.filter((condition) =>
+        matchesCondition(snapshot, condition)
+      );
+      return {
+        matched: matched.length >= (group.minMatches ?? group.conditions.length),
+        failedConditions: group.conditions.filter(
+          (condition) => !matchesCondition(snapshot, condition)
+        )
+      };
+    });
     const optionalMatches = (rule.optionalConditions || []).filter((condition) =>
       matchesCondition(snapshot, condition)
     );
+    const usesGroups = groupEvaluations.length > 0;
     return {
       category: rule.category,
-      matched:
-        matchedConditions.length >=
-        (rule.minMatches ?? rule.conditions.length),
+      matched: usesGroups
+        ? groupEvaluations.every((group) => group.matched)
+        : matchedConditions.length >= (rule.minMatches ?? conditions.length),
       matchedCount: matchedConditions.length,
-      requiredCount: rule.minMatches ?? rule.conditions.length,
-      failedConditions,
+      requiredCount: rule.minMatches ?? conditions.length,
+      failedConditions: usesGroups
+        ? groupEvaluations.flatMap((group) =>
+            group.matched ? [] : group.failedConditions
+          )
+        : failedConditions,
       optionalMatches
     };
   });

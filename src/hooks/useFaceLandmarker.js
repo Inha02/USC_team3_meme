@@ -9,6 +9,26 @@ const REMOTE_WASM =
   "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm";
 const REMOTE_MODEL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task";
+const BROW_CALIBRATION_FRAMES = 45;
+
+function calculateNormalizedBrowDistance(landmarks) {
+  const leftInnerBrow = landmarks?.[107];
+  const rightInnerBrow = landmarks?.[336];
+  const leftEyeOuter = landmarks?.[33];
+  const rightEyeOuter = landmarks?.[263];
+  if (!leftInnerBrow || !rightInnerBrow || !leftEyeOuter || !rightEyeOuter) {
+    return null;
+  }
+  const browDistance = Math.hypot(
+    leftInnerBrow.x - rightInnerBrow.x,
+    leftInnerBrow.y - rightInnerBrow.y
+  );
+  const eyeDistance = Math.hypot(
+    leftEyeOuter.x - rightEyeOuter.x,
+    leftEyeOuter.y - rightEyeOuter.y
+  );
+  return eyeDistance > 0 ? browDistance / eyeDistance : null;
+}
 
 async function loadRules() {
   const response = await fetch("./config/expressionRules.json");
@@ -51,6 +71,8 @@ export function useFaceLandmarker() {
   const animationRef = useRef(null);
   const landmarkerRef = useRef(null);
   const lastVideoTimeRef = useRef(-1);
+  const browBaselineRef = useRef(null);
+  const browCalibrationSamplesRef = useRef([]);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
   const [rules, setRules] = useState(null);
@@ -96,6 +118,21 @@ export function useFaceLandmarker() {
             const categories = result.faceBlendshapes?.[0]?.categories;
             if (categories?.length) {
               const shapes = categoriesToShapeMap(categories);
+              const browDistance = calculateNormalizedBrowDistance(
+                result.faceLandmarks?.[0]
+              );
+              if (browDistance !== null) {
+                const samples = browCalibrationSamplesRef.current;
+                if (samples.length < BROW_CALIBRATION_FRAMES) {
+                  samples.push(browDistance);
+                  browBaselineRef.current =
+                    samples.reduce((total, value) => total + value, 0) /
+                    samples.length;
+                }
+                shapes.browInnerDistance = browDistance;
+                shapes.browInnerDistanceDelta =
+                  browDistance - (browBaselineRef.current ?? browDistance);
+              }
               bufferRef.current.addFrame(shapes);
               // 개발자 도구에서 52종 blendshape 값을 확인할 수 있습니다.
               if (import.meta.env.DEV) console.debug("blendshape", shapes);

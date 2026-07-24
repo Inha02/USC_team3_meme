@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import logoUrl from "../assets/facememe-logo.png";
 
 const categoryLabels = {
-  surprised: "놀람",
-  laughing: "폭소",
-  angry: "화남",
-  sad: "울상/현타",
-  neutral: "무표정"
+  surprised: "놀람 👀",
+  laughing: "웃김 😂",
+  angry: "화남 😠",
+  sad: "슬픔 😞",
+  neutral: "무표정 😐"
 };
 
 export function ResultApp() {
@@ -74,17 +74,13 @@ export function ResultApp() {
             <section className="captured-expression">
               <img src={meme.capturedImage} alt="버튼을 누른 순간 캡처된 표정" />
               <div>
-                <span>캡처된 표정</span>
+                <span>MY FACE</span>
                 <strong>{categoryLabels[meme.category] || "무표정"}</strong>
               </div>
             </section>
           )}
           <section className="meme-card">
             <img src={meme.imageUrl} alt={`${categoryLabels[meme.category]} 표정 밈`} />
-            <div className="meme-meta">
-              <span>{categoryLabels[meme.category] || "무표정"}</span>
-              <strong>{meme.templateName || "추천 짤"}</strong>
-            </div>
           </section>
           {meme.warning && <p className="warning">{meme.warning}</p>}
         </>
