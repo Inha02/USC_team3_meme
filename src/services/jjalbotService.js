@@ -1,7 +1,6 @@
 import axios from "axios";
 import fs from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
 
 const API_URL = "https://api.jjalbot.com";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -18,69 +17,26 @@ let templatePools = null;
 let initializePromise = null;
 const categoryIndexes = Object.fromEntries(CATEGORIES.map((category) => [category, 0]));
 
-function escapeXml(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
-async function renderKoreanCaption(imageUrl, caption, cacheDirectory, category) {
-  const response = await axios.get(imageUrl, {
-    responseType: "arraybuffer",
-    timeout: 15000,
-    maxContentLength: 20 * 1024 * 1024
-  });
-  const input = Buffer.from(response.data);
-  const image = sharp(input, { animated: false });
-  const metadata = await image.metadata();
-  const width = metadata.width || 640;
-  const height = metadata.height || 640;
-  const fontSize = Math.max(28, Math.min(64, Math.round(width / 10)));
-  const strokeWidth = Math.max(4, Math.round(fontSize / 8));
-  const overlay = Buffer.from(`
-    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <text x="50%" y="${fontSize + 22}" text-anchor="middle"
-        font-family="Apple SD Gothic Neo, Malgun Gothic, Noto Sans CJK KR, sans-serif"
-        font-size="${fontSize}" font-weight="900"
-        fill="white" stroke="black" stroke-width="${strokeWidth}"
-        paint-order="stroke fill" stroke-linejoin="round">${escapeXml(caption)}</text>
-    </svg>
-  `);
-  const output = await image
-    .composite([{ input: overlay, top: 0, left: 0 }])
-    .jpeg({ quality: 90 })
-    .toBuffer();
-  const outputDirectory = path.join(cacheDirectory, "generated");
-  await fs.mkdir(outputDirectory, { recursive: true });
-  const localPath = path.join(
-    outputDirectory,
-    `memecam-${category}-${Date.now()}.jpg`
-  );
-  await fs.writeFile(localPath, output);
-  return {
-    localPath,
-    imageUrl: `data:image/jpeg;base64,${output.toString("base64")}`
-  };
-}
-
 function isUsableJjal(jjal) {
-  const imageResource = jjal?.resources?.find(
-    (resource) =>
-      resource.url === jjal.imageUrl &&
-      String(resource.contentType || "").startsWith("image/")
+  const contentType = String(
+    jjal?.type || jjal?.metadata?.contentType || ""
+  ).toLowerCase();
+  const hasStaticExtension = /\.(?:jpe?g|png|webp)(?:\?|$)/i.test(
+    jjal?.imageUrl || ""
   );
-  const imageExtension = /\.(?:jpe?g|png|webp|gif)(?:\?|$)/i.test(jjal?.imageUrl || "");
+  const isAnimated =
+    Boolean(jjal?.videoUrl) ||
+    contentType.includes("gif") ||
+    contentType.startsWith("video/") ||
+    /\.gif(?:\?|$)/i.test(jjal?.imageUrl || "");
   return (
     jjal &&
     !jjal.nsfw &&
+    !isAnimated &&
     typeof jjal.imageUrl === "string" &&
     jjal.imageUrl.startsWith("https://") &&
-    (String(jjal.type || jjal.metadata?.contentType || "").startsWith("image/") ||
-      Boolean(imageResource) ||
-      imageExtension)
+    (["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(contentType) ||
+      hasStaticExtension)
   );
 }
 
@@ -123,7 +79,7 @@ async function loadCache(cacheFile) {
   try {
     const cache = JSON.parse(await fs.readFile(cacheFile, "utf8"));
     const age = Date.now() - new Date(cache.generatedAt).getTime();
-    if (cache.version !== 1 || age > CACHE_TTL_MS) return null;
+    if (cache.version !== 2 || age > CACHE_TTL_MS) return null;
     if (!CATEGORIES.every((category) => Array.isArray(cache.pools?.[category]))) {
       return null;
     }
@@ -139,7 +95,7 @@ async function saveCache(cacheFile, pools) {
     cacheFile,
     JSON.stringify(
       {
-        version: 1,
+        version: 2,
         generatedAt: new Date().toISOString(),
         source: "jjalbot-search",
         keywords: searchKeywords,
@@ -195,7 +151,7 @@ function nextTemplate(category) {
   return selected;
 }
 
-async function fallbackResult(category, caption, projectRoot, reason) {
+async function fallbackResult(category, projectRoot, reason) {
   const localPath = path.join(projectRoot, "assets", "fallback", `${category}.jpg`);
   let imageUrl = `file://${localPath}`;
   try {
@@ -209,19 +165,28 @@ async function fallbackResult(category, caption, projectRoot, reason) {
     pageUrl: null,
     localPath,
     isFallback: true,
-    caption,
+    extension: "jpg",
     warning: reason
   };
 }
 
-export async function createMemeImage(category, caption, projectRoot, cacheDirectory) {
+function getImageExtension(jjal) {
+  const contentType = String(
+    jjal.type || jjal.metadata?.contentType || ""
+  ).toLowerCase();
+  if (contentType.includes("gif") || /\.gif(?:\?|$)/i.test(jjal.imageUrl)) return "gif";
+  if (contentType.includes("webp") || /\.webp(?:\?|$)/i.test(jjal.imageUrl)) return "webp";
+  if (contentType.includes("png") || /\.png(?:\?|$)/i.test(jjal.imageUrl)) return "png";
+  return "jpg";
+}
+
+export async function createMemeImage(category, projectRoot, cacheDirectory) {
   await initializeTemplates(projectRoot, cacheDirectory);
   const jjal = nextTemplate(category);
   if (!jjal?.imageUrl) {
     console.warn(`[jalBot] ${category} 카테고리에 사용할 짤이 없습니다.`);
     return fallbackResult(
       category,
-      caption,
       projectRoot,
       "jalBot 검색 결과가 없어 로컬 이미지를 사용했어요."
     );
@@ -231,27 +196,18 @@ export async function createMemeImage(category, caption, projectRoot, cacheDirec
     console.log(
       `[jalBot] 이미지 요청: category=${category}, title="${jjal.title}", url=${jjal.imageUrl}`
     );
-    const rendered = await renderKoreanCaption(
-      jjal.imageUrl,
-      caption,
-      cacheDirectory,
-      category
-    );
-    console.log(`[jalBot] 한글 캡션 합성 완료: ${rendered.localPath}`);
     return {
-      imageUrl: rendered.imageUrl,
+      imageUrl: jjal.imageUrl,
       pageUrl: `https://jjalbot.com/jjals/${jjal.shortId}`,
-      localPath: rendered.localPath,
       isFallback: false,
-      isLocalGenerated: true,
-      caption,
+      extension: getImageExtension(jjal),
       templateName: jjal.title,
       source: "jjalbot"
     };
   } catch (error) {
-    console.warn("[jalBot] 이미지 조회 또는 합성 실패:", error.message);
+    console.warn("[jalBot] 이미지 조회 실패:", error.message);
     console.warn(`[jalBot] ${category} 카테고리의 로컬 폴백 JPEG를 사용합니다.`);
-    return fallbackResult(category, caption, projectRoot, error.message);
+    return fallbackResult(category, projectRoot, error.message);
   }
 }
 

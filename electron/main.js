@@ -3,13 +3,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import axios from "axios";
-import dotenv from "dotenv";
-import { createCaption } from "../src/services/captionService.js";
 import { createMemeImage, initializeTemplates } from "../src/services/jjalbotService.js";
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(currentDir, "..");
-dotenv.config({ path: path.join(projectRoot, ".env") });
 
 const isDevelopment = !app.isPackaged;
 let floatingWindow = null;
@@ -91,17 +88,14 @@ async function generateMeme(category, capturedImage = null) {
   isGenerating = true;
   try {
     latestCategory = category;
-    const caption = await createCaption(category);
     const meme = await createMemeImage(
       category,
-      caption,
       projectRoot,
       app.getPath("userData")
     );
     latestMeme = {
       ...meme,
       category,
-      caption,
       capturedImage,
       createdAt: Date.now()
     };
@@ -156,12 +150,12 @@ ipcMain.handle("meme:download", async () => {
   if (!latestMeme?.imageUrl) return { canceled: true, reason: "저장할 밈이 없습니다." };
   const defaultPath = path.join(
     app.getPath("downloads"),
-    `memecam-${latestMeme.category}-${Date.now()}.jpg`
+    `memecam-${latestMeme.category}-${Date.now()}.${latestMeme.extension || "jpg"}`
   );
   const selection = await dialog.showSaveDialog(resultWindow, {
     title: "밈 이미지 저장",
     defaultPath,
-    filters: [{ name: "이미지", extensions: ["jpg", "jpeg", "png"] }]
+    filters: [{ name: "이미지", extensions: ["jpg", "jpeg", "png", "webp"] }]
   });
   if (selection.canceled || !selection.filePath) return { canceled: true };
 

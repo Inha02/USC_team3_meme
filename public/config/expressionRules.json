@@ -8,9 +8,9 @@
       "label": "놀람",
       "minMatches": 2,
       "conditions": [
-        { "shape": "eyeWideLeft", "operator": ">=", "threshold": 0.06 },
-        { "shape": "eyeWideRight", "operator": ">=", "threshold": 0.06 },
-        { "shape": "jawOpen", "operator": ">=", "threshold": 0.1 }
+        { "shape": "eyeWideLeft", "operator": ">=", "threshold": 0.01 },
+        { "shape": "eyeWideRight", "operator": ">=", "threshold": 0.01 },
+        { "shape": "jawOpen", "operator": ">=", "threshold": 0.3 }
       ]
     },
     {

@@ -79,7 +79,7 @@ export function ResultApp() {
             <img src={meme.imageUrl} alt={`${categoryLabels[meme.category]} 표정 밈`} />
             <div className="meme-meta">
               <span>{categoryLabels[meme.category] || "무표정"}</span>
-              <strong>{meme.caption}</strong>
+              <strong>{meme.templateName || "추천 짤"}</strong>
             </div>
           </section>
           {meme.warning && <p className="warning">{meme.warning}</p>}
