@@ -40,6 +40,28 @@ function isUsableJjal(jjal) {
   );
 }
 
+export function isExactTitleMatch(jjal, keyword) {
+  const title = String(jjal?.title || "").normalize("NFC").toLowerCase();
+  const normalizedKeyword = String(keyword).normalize("NFC").toLowerCase();
+  if (jjal?.matchType !== "exact") return false;
+
+  // 한글·영문·숫자 검색어는 제목의 독립된 단어와 정확히 같아야 합니다.
+  // 예: "멍"은 "멍 때리기"에는 일치하지만 "콧구멍"에는 일치하지 않습니다.
+  if (/^[\p{L}\p{N}]+$/u.test(normalizedKeyword)) {
+    const titleWords = title.match(/[\p{L}\p{N}]+/gu) || [];
+    return titleWords.includes(normalizedKeyword);
+  }
+
+  // 물음표 같은 기호 검색어는 동일한 기호 문자열이 있을 때만 허용합니다.
+  return title.includes(normalizedKeyword);
+}
+
+function isExactCategoryTitleMatch(jjal, category) {
+  return (searchKeywords[category] || []).some((keyword) =>
+    isExactTitleMatch(jjal, keyword)
+  );
+}
+
 async function searchKeyword(keyword) {
   console.log(`[jalBot] 검색 요청: "${keyword}"`);
   const response = await axios.get(`${API_URL}/jjals`, {
@@ -51,9 +73,10 @@ async function searchKeyword(keyword) {
   }
   const results = response.data
     .filter(isUsableJjal)
+    .filter((jjal) => isExactTitleMatch(jjal, keyword))
     .sort((left, right) => (right.views || 0) - (left.views || 0))
     .slice(0, 25);
-  console.log(`[jalBot] 검색 결과: "${keyword}" → ${results.length}개`);
+  console.log(`[jalBot] 제목 정확 일치 결과: "${keyword}" → ${results.length}개`);
   return results;
 }
 
@@ -79,11 +102,19 @@ async function loadCache(cacheFile) {
   try {
     const cache = JSON.parse(await fs.readFile(cacheFile, "utf8"));
     const age = Date.now() - new Date(cache.generatedAt).getTime();
-    if (cache.version !== 2 || age > CACHE_TTL_MS) return null;
+    if (cache.version !== 5 || age > CACHE_TTL_MS) return null;
+    if (cache.keywordSignature !== JSON.stringify(searchKeywords)) return null;
     if (!CATEGORIES.every((category) => Array.isArray(cache.pools?.[category]))) {
       return null;
     }
-    return cache.pools;
+    return Object.fromEntries(
+      CATEGORIES.map((category) => [
+        category,
+        cache.pools[category].filter((jjal) =>
+          isExactCategoryTitleMatch(jjal, category)
+        )
+      ])
+    );
   } catch {
     return null;
   }
@@ -95,10 +126,11 @@ async function saveCache(cacheFile, pools) {
     cacheFile,
     JSON.stringify(
       {
-        version: 2,
+        version: 5,
         generatedAt: new Date().toISOString(),
         source: "jjalbot-search",
         keywords: searchKeywords,
+        keywordSignature: JSON.stringify(searchKeywords),
         pools
       },
       null,
@@ -138,9 +170,11 @@ export function initializeTemplates(projectRoot, cacheDirectory = path.join(proj
 }
 
 function nextTemplate(category) {
-  const pool = templatePools[category]?.length
-    ? templatePools[category]
-    : templatePools.neutral;
+  const categoryPool = (templatePools[category] || []).filter((jjal) =>
+    isExactCategoryTitleMatch(jjal, category)
+  );
+  templatePools[category] = categoryPool;
+  const pool = categoryPool;
   if (!pool?.length) return null;
   const index = categoryIndexes[category] % pool.length;
   categoryIndexes[category] += 1;

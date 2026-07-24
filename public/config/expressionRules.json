@@ -42,7 +42,7 @@
         {
           "minMatches": 1,
           "conditions": [
-            { "shape": "browInnerDistanceDelta", "operator": "<=", "threshold": 0.01 }
+            { "shape": "browInnerDistanceDelta", "operator": "<=", "threshold": -0.01 }
           ]
         }
       ]
@@ -55,15 +55,9 @@
         {
           "minMatches": 1,
           "conditions": [
-            { "shape": "browInnerUp", "operator": ">=", "threshold": 0.18 }
-          ]
-        },
-        {
-          "minMatches": 1,
-          "conditions": [
-            { "shape": "mouthFrownLeft", "operator": ">=", "threshold": 0.06 },
-            { "shape": "mouthFrownRight", "operator": ">=", "threshold": 0.06 },
-            { "shape": "browInnerDistanceDelta", "operator": ">=", "threshold": 0.01 }
+            { "shape": "mouthFrownLeft", "operator": ">=", "threshold": 0.01 },
+            { "shape": "mouthFrownRight", "operator": ">=", "threshold": 0.01 },
+            { "shape": "browInnerDistanceDelta", "operator": ">=", "threshold": 0.03 }
           ]
         }
       ]
