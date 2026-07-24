@@ -14,8 +14,8 @@ export function ResultApp() {
   const [isBusy, setIsBusy] = useState(false);
 
   useEffect(() => {
-    window.memeCam.getLatestMeme().then(setMeme);
-    return window.memeCam.onMemeUpdated(setMeme);
+    window.faceMeme.getLatestMeme().then(setMeme);
+    return window.faceMeme.onMemeUpdated(setMeme);
   }, []);
 
   const regenerate = async () => {
@@ -23,7 +23,7 @@ export function ResultApp() {
     setIsBusy(true);
     setStatus("새 밈을 만들고 있어요.");
     try {
-      const nextMeme = await window.memeCam.regenerateMeme();
+      const nextMeme = await window.faceMeme.regenerateMeme();
       setMeme(nextMeme);
       setStatus("");
     } catch (error) {
@@ -38,7 +38,7 @@ export function ResultApp() {
     setIsBusy(true);
     setStatus("저장 위치를 선택해 주세요.");
     try {
-      const result = await window.memeCam.downloadMeme();
+      const result = await window.faceMeme.downloadMeme();
       setStatus(result.canceled ? "" : "저장했어요!");
     } catch (error) {
       setStatus(error?.message || "이미지를 저장하지 못했어요.");
@@ -51,14 +51,14 @@ export function ResultApp() {
     <main className="result-shell">
       <header className="result-header">
         <div>
-          <p className="eyebrow">MEMECAM</p>
+          <p className="eyebrow">FACEMEME</p>
           <h1>지금 표정으로 만든 밈</h1>
         </div>
         <button
           type="button"
           className="icon-button"
           aria-label="닫기"
-          onClick={() => window.memeCam.closeResult()}
+          onClick={() => window.faceMeme.closeResult()}
         >
           ×
         </button>

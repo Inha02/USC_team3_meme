@@ -1,4 +1,4 @@
-# MemeCam
+# facememe
 
 웹캠 프리뷰를 노출하지 않고 표정을 계속 분석하다가, 60×60px 플로팅 버튼을 누른 순간의 표정으로 한국 짤을 추천하는 Electron 앱입니다. MediaPipe 추론은 렌더러에서, jalBot 검색과 파일 저장은 Electron 메인 프로세스에서 처리합니다.
 

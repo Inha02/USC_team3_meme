@@ -33,7 +33,7 @@ export function FloatingApp() {
     const deltaY = y - drag.y;
     if (Math.abs(deltaX) + Math.abs(deltaY) >= 2) drag.moved = true;
     if (deltaX || deltaY) {
-      window.memeCam.moveFloatingWindow({ x: deltaX, y: deltaY });
+      window.faceMeme.moveFloatingWindow({ x: deltaX, y: deltaY });
       drag.x = x;
       drag.y = y;
     }
@@ -46,7 +46,7 @@ export function FloatingApp() {
 
     const { snapshot, hasFace, capturedImage } = takeSnapshot();
     if (!hasFace) {
-      window.memeCam.logExpression({ type: "no-face" });
+      window.faceMeme.logExpression({ type: "no-face" });
       setMessage("얼굴을 카메라에 보여주세요.");
       setTimeout(() => setMessage(""), 1800);
       return;
@@ -57,7 +57,7 @@ export function FloatingApp() {
     try {
       const explanation = explainExpression(snapshot, rules);
       const category = explanation.category;
-      window.memeCam.logExpression({
+      window.faceMeme.logExpression({
         type: "capture",
         category,
         scores: snapshot,
@@ -68,7 +68,7 @@ export function FloatingApp() {
             failed: evaluation.failedConditions.map((condition) => condition.shape)
           }))
       });
-      await window.memeCam.createMeme({ category, snapshot, capturedImage });
+      await window.faceMeme.createMeme({ category, snapshot, capturedImage });
       setMessage("");
     } catch (caughtError) {
       setMessage(caughtError?.message || "생성에 실패했어요.");

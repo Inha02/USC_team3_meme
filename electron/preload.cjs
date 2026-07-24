@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("memeCam", {
+contextBridge.exposeInMainWorld("faceMeme", {
   createMeme: (payload) => ipcRenderer.invoke("meme:create", payload),
   regenerateMeme: () => ipcRenderer.invoke("meme:regenerate"),
   downloadMeme: () => ipcRenderer.invoke("meme:download"),

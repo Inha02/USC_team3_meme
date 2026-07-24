@@ -65,7 +65,7 @@ function createResultWindow() {
     minWidth: 380,
     minHeight: 620,
     show: false,
-    title: "MemeCam 결과",
+    title: "facememe 결과",
     backgroundColor: "#17171c",
     webPreferences: {
       preload: path.join(currentDir, "preload.cjs"),
@@ -150,7 +150,7 @@ ipcMain.handle("meme:download", async () => {
   if (!latestMeme?.imageUrl) return { canceled: true, reason: "저장할 밈이 없습니다." };
   const defaultPath = path.join(
     app.getPath("downloads"),
-    `memecam-${latestMeme.category}-${Date.now()}.${latestMeme.extension || "jpg"}`
+    `facememe-${latestMeme.category}-${Date.now()}.${latestMeme.extension || "jpg"}`
   );
   const selection = await dialog.showSaveDialog(resultWindow, {
     title: "밈 이미지 저장",
