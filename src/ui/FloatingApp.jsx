@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { explainExpression } from "../classifier/classifier.js";
 import { useFaceLandmarker } from "../hooks/useFaceLandmarker.js";
+import captureButtonUrl from "../assets/facememe-capture-button.png";
 
 const statusLabels = {
   loading: "카메라 준비 중",
@@ -97,8 +98,14 @@ export function FloatingApp() {
           dragRef.current.dragging = false;
         }}
       >
-        <span className="camera-icon" aria-hidden="true">
-          {status === "error" ? "!" : isGenerating ? "···" : "●"}
+        <img
+          className="capture-logo"
+          src={captureButtonUrl}
+          alt=""
+          draggable="false"
+        />
+        <span className="capture-status" aria-hidden="true">
+          {status === "error" ? "!" : isGenerating ? "···" : ""}
         </span>
       </button>
       {message && <span className="floating-message">{message}</span>}

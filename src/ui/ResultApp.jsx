@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import logoUrl from "../assets/facememe-logo.png";
 
 const categoryLabels = {
   surprised: "놀람",
@@ -50,9 +51,12 @@ export function ResultApp() {
   return (
     <main className="result-shell">
       <header className="result-header">
-        <div>
-          <p className="eyebrow">FACEMEME</p>
-          <h1>지금 표정으로 만든 밈</h1>
+        <div className="brand-lockup">
+          <img className="brand-logo" src={logoUrl} alt="facememe 로고" />
+          <div>
+            <p className="eyebrow">FACEMEME</p>
+            <h1>FACE IT, MEME IT</h1>
+          </div>
         </div>
         <button
           type="button"

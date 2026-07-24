@@ -1,8 +1,9 @@
 :root {
-  color: #f7f5ff;
+  color: #211310;
   background: transparent;
   font-family:
-    Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    ui-monospace, "SFMono-Regular", Pretendard, "Apple SD Gothic Neo",
+    "Noto Sans KR", monospace;
   font-synthesis: none;
 }
 
@@ -45,21 +46,21 @@ button {
 .capture-button {
   width: 54px;
   height: 54px;
-  border: 2px solid rgba(255, 255, 255, 0.72);
-  border-radius: 50%;
-  color: white;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  border: 3px solid #ffd966;
+  border-radius: 5px;
   cursor: grab;
-  background:
-    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.36), transparent 24%),
-    linear-gradient(145deg, #ff4d7d 4%, #8d4dff 96%);
-  box-shadow: 0 8px 24px rgba(31, 11, 65, 0.4);
+  background: #ffd966;
+  box-shadow: none;
   transition: filter 160ms ease, transform 160ms ease;
   touch-action: none;
 }
 
 .capture-button:hover {
-  filter: brightness(1.08);
-  transform: scale(1.04);
+  filter: brightness(1.03);
+  transform: translate(-1px, -1px);
 }
 
 .capture-button:active {
@@ -73,19 +74,34 @@ button {
 }
 
 .capture-button--error {
-  background: linear-gradient(145deg, #59606f, #282d38);
+  filter: grayscale(0.85);
 }
 
-.camera-icon {
+.capture-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 1px;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+.capture-status {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  margin: auto;
-  border: 3px solid white;
-  border-radius: 8px;
-  font-size: 12px;
+  color: #fff;
+  background: rgba(255, 104, 31, 0.88);
+  font-size: 13px;
   font-weight: 900;
+  opacity: 0;
+}
+
+.capture-button--error .capture-status,
+.capture-button--working .capture-status {
+  opacity: 1;
 }
 
 .floating-message {
@@ -94,8 +110,8 @@ button {
 
 @keyframes pulse {
   50% {
-    filter: brightness(1.25);
-    transform: scale(0.94);
+    filter: brightness(1.12);
+    transform: translate(2px, 2px);
   }
 }
 
@@ -103,8 +119,11 @@ button {
   min-height: 100vh;
   padding: 28px;
   background:
-    radial-gradient(circle at 92% 0%, rgba(132, 83, 255, 0.22), transparent 32%),
-    #17171c;
+    linear-gradient(#fff 0 0) 20px 20px / 42px 4px no-repeat,
+    linear-gradient(#fff 0 0) 20px 20px / 4px 42px no-repeat,
+    linear-gradient(#fff 0 0) calc(100% - 62px) calc(100% - 24px) / 42px 4px no-repeat,
+    linear-gradient(#fff 0 0) calc(100% - 24px) calc(100% - 62px) / 4px 42px no-repeat,
+    #ffd966;
   display: flex;
   flex-direction: column;
 }
@@ -117,9 +136,26 @@ button {
   margin-bottom: 20px;
 }
 
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  border: 3px solid #fff;
+  border-radius: 3px;
+  object-fit: cover;
+  box-shadow: 4px 4px 0 #211310;
+  image-rendering: pixelated;
+}
+
 .eyebrow {
   margin: 0 0 6px;
-  color: #bda8ff;
+  color: #ff681f;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.18em;
@@ -129,33 +165,36 @@ h1 {
   margin: 0;
   font-size: 22px;
   letter-spacing: -0.03em;
+  text-transform: uppercase;
 }
 
 .icon-button {
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 50%;
-  background: #2b2b33;
-  color: #d9d7e2;
+  border: 3px solid #211310;
+  border-radius: 3px;
+  background: #fff;
+  color: #211310;
   font-size: 22px;
   cursor: pointer;
+  box-shadow: 3px 3px 0 #ff681f;
 }
 
 .meme-card {
   overflow: hidden;
-  border: 1px solid #34343e;
-  border-radius: 18px;
-  background: #222229;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  border: 4px solid #211310;
+  border-radius: 4px;
+  background: #fff7db;
+  box-shadow: 7px 7px 0 #ff681f;
 }
 
 .captured-expression {
   margin-bottom: 14px;
   padding: 10px;
-  border: 1px solid #34343e;
-  border-radius: 16px;
-  background: #222229;
+  border: 3px solid #211310;
+  border-radius: 4px;
+  background: #fff7db;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -164,9 +203,10 @@ h1 {
 .captured-expression img {
   width: 92px;
   height: 68px;
-  border-radius: 11px;
+  border: 3px solid #211310;
+  border-radius: 2px;
   object-fit: cover;
-  background: #0e0e12;
+  background: #fff;
 }
 
 .captured-expression div {
@@ -176,12 +216,12 @@ h1 {
 }
 
 .captured-expression span {
-  color: #9b98a8;
+  color: #9b4a20;
   font-size: 12px;
 }
 
 .captured-expression strong {
-  color: #f5f1ff;
+  color: #211310;
   font-size: 16px;
 }
 
@@ -190,7 +230,7 @@ h1 {
   width: 100%;
   height: 250px;
   object-fit: contain;
-  background: #0e0e12;
+  background: #fff;
 }
 
 .meme-meta {
@@ -204,14 +244,16 @@ h1 {
 
 .meme-meta span {
   padding: 5px 9px;
-  border-radius: 999px;
-  color: #d6caff;
-  background: #3a305c;
+  border: 2px solid #211310;
+  border-radius: 2px;
+  color: #fff;
+  background: #ff681f;
   font-size: 12px;
   white-space: nowrap;
 }
 
 .meme-meta strong {
+  color: #211310;
   overflow: hidden;
   text-align: right;
   text-overflow: ellipsis;
@@ -220,25 +262,26 @@ h1 {
 
 .warning {
   margin: 12px 2px 0;
-  color: #e3bd77;
+  color: #9b2d16;
   font-size: 12px;
   line-height: 1.5;
 }
 
 .empty-card {
   height: 400px;
-  border: 1px dashed #464651;
-  border-radius: 18px;
+  border: 4px dashed #211310;
+  border-radius: 4px;
   display: grid;
   place-items: center;
-  color: #9896a3;
+  color: #613b2b;
+  background: #fff7db;
 }
 
 .result-status {
   min-height: 22px;
   margin: auto 0 8px;
   padding-top: 12px;
-  color: #aaa7b5;
+  color: #704231;
   font-size: 13px;
   text-align: center;
 }
@@ -252,7 +295,8 @@ h1 {
 .result-actions button {
   height: 48px;
   border: 0;
-  border-radius: 13px;
+  border: 3px solid #211310;
+  border-radius: 3px;
   color: white;
   font-weight: 750;
   cursor: pointer;
@@ -264,9 +308,13 @@ h1 {
 }
 
 .secondary-button {
-  background: #303039;
+  color: #211310 !important;
+  background: #fff;
+  box-shadow: 4px 4px 0 #211310;
 }
 
 .primary-button {
-  background: linear-gradient(135deg, #ff4d7d, #7b50ff);
+  color: #fff !important;
+  background: #ff681f;
+  box-shadow: 4px 4px 0 #211310;
 }
