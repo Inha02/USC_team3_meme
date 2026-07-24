@@ -1,0 +1,51 @@
+{
+  "windowMs": 500,
+  "frameSmoothingCount": 5,
+  "rules": [
+    {
+      "priority": 1,
+      "category": "surprised",
+      "label": "놀람",
+      "minMatches": 2,
+      "conditions": [
+        { "shape": "eyeWideLeft", "operator": ">=", "threshold": 0.06 },
+        { "shape": "eyeWideRight", "operator": ">=", "threshold": 0.06 },
+        { "shape": "jawOpen", "operator": ">=", "threshold": 0.1 }
+      ]
+    },
+    {
+      "priority": 2,
+      "category": "laughing",
+      "label": "폭소",
+      "minMatches": 1,
+      "conditions": [
+        { "shape": "mouthSmileLeft", "operator": ">=", "threshold": 0.35 },
+        { "shape": "mouthSmileRight", "operator": ">=", "threshold": 0.35 }
+      ],
+      "optionalConditions": [
+        { "shape": "cheekSquintLeft", "operator": ">=", "threshold": 0.15 }
+      ]
+    },
+    {
+      "priority": 3,
+      "category": "angry",
+      "label": "화남",
+      "minMatches": 1,
+      "conditions": [
+        { "shape": "browDownLeft", "operator": ">=", "threshold": 0.08 },
+        { "shape": "browDownRight", "operator": ">=", "threshold": 0.08 }
+      ]
+    },
+    {
+      "priority": 4,
+      "category": "sad",
+      "label": "울상/현타",
+      "minMatches": 1,
+      "conditions": [
+        { "shape": "mouthFrownLeft", "operator": ">=", "threshold": 0.06 },
+        { "shape": "browInnerUp", "operator": ">=", "threshold": 0.18 }
+      ]
+    }
+  ],
+  "defaultCategory": "neutral"
+}
