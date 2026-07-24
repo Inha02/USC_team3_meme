@@ -8,8 +8,8 @@
       "label": "놀람",
       "minMatches": 1,
       "conditions": [
-        { "shape": "eyeWideLeft", "operator": ">=", "threshold": 0.01 },
-        { "shape": "eyeWideRight", "operator": ">=", "threshold": 0.01 },
+        { "shape": "eyeWideLeft", "operator": ">=", "threshold": 0.02 },
+        { "shape": "eyeWideRight", "operator": ">=", "threshold": 0.02 },
         { "shape": "jawOpen", "operator": ">=", "threshold": 0.1 }
       ]
     },
@@ -36,13 +36,13 @@
           "conditions": [
             { "shape": "browDownLeft", "operator": ">=", "threshold": 0.01 },
             { "shape": "browDownRight", "operator": ">=", "threshold": 0.01 },
-            { "shape": "browInnerUp", "operator": ">=", "threshold": 0.2 }
+            { "shape": "browInnerDistance", "operator": ">=", "threshold": 0.3 }
           ]
         },
         {
           "minMatches": 1,
           "conditions": [
-            { "shape": "browInnerDistanceDelta", "operator": "<=", "threshold": -0.01 }
+            { "shape": "browInnerDistanceDelta", "operator": "<=", "threshold": -0.00 }
           ]
         }
       ]
@@ -55,9 +55,9 @@
         {
           "minMatches": 1,
           "conditions": [
-            { "shape": "mouthFrownLeft", "operator": ">=", "threshold": 0.01 },
-            { "shape": "mouthFrownRight", "operator": ">=", "threshold": 0.01 },
-            { "shape": "browInnerDistanceDelta", "operator": ">=", "threshold": 0.03 }
+            { "shape": "mouthFrownLeft", "operator": ">=", "threshold": 0.005 },
+            { "shape": "mouthFrownRight", "operator": ">=", "threshold": 0.005 },
+            { "shape": "browInnerDistanceDelta", "operator": "<=", "threshold": -0.00}
           ]
         }
       ]
